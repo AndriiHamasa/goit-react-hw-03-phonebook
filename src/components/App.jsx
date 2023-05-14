@@ -22,12 +22,15 @@ class App extends Component {
     });
   };
 
-  handleAddContact = event => {
-    const { name, number } = event.currentTarget.elements;
-    
+  handleAddContact = values => {
+    const { name, number } = values;
 
-    if (this.state.contacts.map(contact => contact.name).some(collectionName => collectionName === name.value)) {
-      return alert(`${name.value} is already in contacts`);
+    if (
+      this.state.contacts
+        .map(contact => contact.name)
+        .some(collectionName => collectionName === name)
+    ) {
+      return alert(`${name} is already in contacts`);
     }
 
     this.setState(prevState => ({
@@ -35,8 +38,8 @@ class App extends Component {
         ...prevState.contacts,
         {
           id: nanoid(),
-          name: name.value,
-          number: number.value,
+          name: name,
+          number: number,
         },
       ],
     }));
@@ -52,6 +55,22 @@ class App extends Component {
     );
   };
 
+  componentDidMount() {
+    console.log('comopnentDidMount App');
+    console.log(localStorage.getItem('contacts'));
+    if (localStorage.getItem('contacts')) {
+      this.setState({ contacts: JSON.parse(localStorage.getItem('contacts')) });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log('componentDidUpdate App');
+
+    if (prevState.contacts.length !== this.state.contacts.length) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
   render() {
     return (
       <div
@@ -64,13 +83,10 @@ class App extends Component {
         }}
       >
         <div>
-          <h1 style={{textAlign: 'center'}}>Phonebook</h1>
-          <ContactForm
-            onAddContact={this.handleAddContact}
-            onChange={this.handleChange}
-          />
+          <h1 style={{ textAlign: 'center' }}>Phonebook</h1>
+          <ContactForm onAddContact={this.handleAddContact} />
 
-          <h2 style={{textAlign: 'center'}}>Contacts</h2>
+          <h2 style={{ textAlign: 'center' }}>Contacts</h2>
           <Filter contacts={this.state} onChange={this.handleChange} />
           <ContactList
             contacts={this.renderContacts()}
